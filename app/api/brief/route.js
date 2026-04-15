@@ -1,10 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
-
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -28,19 +21,32 @@ export async function POST(request) {
     const aiData = await aiResponse.json();
     const briefText = aiData.content?.find(b => b.type === 'text')?.text || '';
 
-    // ── 2. Save to Supabase ───────────────────────────────────────────
+    // ── 2. Save to Supabase (anon key insert) ─────────────────────────
     if (formData) {
-      const { error } = await supabase.from('nrg_submissions').insert({
-        name: formData.name || null,
-        role: formData.role || null,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        urgency: formData.urgency || null,
-        form_data: formData,
-        ai_brief: briefText,
-      });
-      if (error) {
-        console.error('Supabase insert error:', error.message);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/nrg_submissions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({
+            name: formData.name || null,
+            role: formData.role || null,
+            email: formData.email || null,
+            phone: formData.phone || null,
+            urgency: formData.urgency || null,
+            form_data: formData,
+            ai_brief: briefText,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('Supabase insert error:', err);
       } else {
         console.log('Submission saved to Supabase');
       }
