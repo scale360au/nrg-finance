@@ -237,7 +237,7 @@ Output only raw HTML. No markdown, no code fences, no backtick blocks. Just the 
       const res = await fetch('/api/brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: buildPrompt() }),
+        body: JSON.stringify({ prompt: buildPrompt(), formData: data }),
       });
       const json = await res.json();
       const text = json.content?.find(b => b.type === 'text')?.text || '';
@@ -296,17 +296,15 @@ Output only raw HTML. No markdown, no code fences, no backtick blocks. Just the 
             }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: BLUE_MID, flexShrink: 0 }} />
               <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>
-                {step === 6 ? 'COACHING PREP BRIEF · SCALE360' : 'PREPARED BY SCALE360'}
+                PREPARED BY SCALE360
               </span>
             </div>
           </div>
           <div style={{ fontSize: 20, fontWeight: 600, color: '#fff', marginBottom: 4, position: 'relative' }}>
-            {step === 6 ? 'NRG Finance — Coaching Prep Brief' : 'NRG Finance & Advocacy — Business Assessment'}
+            NRG Finance &amp; Advocacy — Business Assessment
           </div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, position: 'relative' }}>
-            {step === 6
-              ? `AI-generated session brief · ${new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`
-              : 'Help us understand your business before our Zoom call. Takes 5–7 minutes.'}
+            {step === 6 ? 'Your answers have been received.' : 'Help us understand your business before our Zoom call. Takes 5–7 minutes.'}
           </div>
         </div>
 
@@ -604,22 +602,6 @@ Output only raw HTML. No markdown, no code fences, no backtick blocks. Just the 
         {/* ── BRIEF SCREEN ── */}
         {step === 6 && (
           <div>
-            {/* Action buttons */}
-            {!loading && sections.length > 0 && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-                <button onClick={copyBrief} style={{
-                  background: '#fff', border: '1px solid #D1D5DB', borderRadius: 8,
-                  padding: '8px 16px', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
-                  cursor: 'pointer', color: '#374151',
-                }}>Copy to clipboard</button>
-                <button onClick={() => window.print()} style={{
-                  background: '#fff', border: '1px solid #D1D5DB', borderRadius: 8,
-                  padding: '8px 16px', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
-                  cursor: 'pointer', color: '#374151',
-                }}>Print brief</button>
-              </div>
-            )}
-
             {loading ? (
               <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
                 <div style={{
@@ -628,27 +610,52 @@ Output only raw HTML. No markdown, no code fences, no backtick blocks. Just the 
                   animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem',
                 }} />
                 <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 6 }}>Generating coaching prep brief...</div>
-                <div style={{ fontSize: 13, color: '#6B7280' }}>{loadMsg}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 6 }}>Submitting your answers...</div>
+                <div style={{ fontSize: 13, color: '#6B7280' }}>Just a moment</div>
               </div>
             ) : (
-              <div ref={briefRef}>
-                {briefSections.map((sec, i) => (
-                  <BriefCard key={i} icon={sec.icon} label={sec.label}>
-                    {sections[i]
-                      ? <div dangerouslySetInnerHTML={{ __html: sections[i] }} />
-                      : <p style={{ color: '#9CA3AF', fontStyle: 'italic' }}>Section not generated</p>
-                    }
-                  </BriefCard>
-                ))}
+              <div style={{
+                background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12,
+                padding: '2.5rem 2rem', textAlign: 'center',
+              }}>
+                {/* Tick icon */}
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%', background: '#E8F0F8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 1.25rem',
+                }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+
+                <h2 style={{ fontSize: 22, fontWeight: 600, color: '#111827', marginBottom: 10 }}>
+                  Thanks — all done!
+                </h2>
+                <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.7, maxWidth: 400, margin: '0 auto 1.75rem' }}>
+                  We've received your answers. Mark will review everything before your Zoom call so you can get straight into the session without going over the basics.
+                </p>
+                <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, maxWidth: 400, margin: '0 auto 2rem' }}>
+                  Keep an eye on your inbox — we'll be in touch to confirm the time and send through any prep notes.
+                </p>
+
+                {/* CTA */}
+                <a href="https://calendly.com/mark-scale360/30min" target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block', background: NAVY, color: '#fff',
+                    padding: '12px 28px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+                    textDecoration: 'none', marginBottom: '2rem',
+                  }}>
+                  Book your Zoom call →
+                </a>
 
                 {/* Footer logos */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid #E5E7EB' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, paddingTop: '1.5rem', borderTop: '1px solid #F3F4F6' }}>
                   <img src="https://www.nrgfinance.com.au/wp-content/uploads/2024/08/NRG.png"
-                    alt="NRG" style={{ height: 24, width: 'auto', opacity: 0.6 }}
+                    alt="NRG" style={{ height: 24, width: 'auto', opacity: 0.5 }}
                     onError={e => e.target.style.display = 'none'} />
-                  <span style={{ fontSize: 11, color: '#9CA3AF' }}>×</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em' }}>SCALE360</span>
+                  <span style={{ fontSize: 11, color: '#D1D5DB' }}>×</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#D1D5DB', letterSpacing: '0.05em' }}>SCALE360</span>
                 </div>
               </div>
             )}
